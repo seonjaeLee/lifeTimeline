@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import CalendarSheet from '../components/common/CalendarSheet'
+import ImportSheet from '../components/common/ImportSheet'
+import type { PlaceItem } from '../utils/parseTimeline'
 
 const DUMMY_PLACES = [
-  { id: 1, time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500, hasPhoto: true, recorded: true },
-  { id: 2, time: '12:45', endTime: '13:30', place: '청담동 파스타집', address: '서울시 강남구 청담동 45', memo: '동료들과 점심. 크림 파스타 맛있었음.', expense: 18000, hasPhoto: true, recorded: true },
-  { id: 3, time: '14:10', endTime: '14:45', place: '코엑스몰', address: '', memo: '', expense: 0, hasPhoto: false, recorded: false },
-  { id: 4, time: '15:20', endTime: '17:00', place: '코엑스 도서관', address: '서울시 강남구 영동대로 513', memo: '독서 시간. 조용하고 집중하기 좋은 환경.', expense: 0, hasPhoto: false, recorded: true },
+  { id: '1', time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500, hasPhoto: true, recorded: true },
+  { id: '2', time: '12:45', endTime: '13:30', place: '청담동 파스타집', address: '서울시 강남구 청담동 45', memo: '동료들과 점심. 크림 파스타 맛있었음.', expense: 18000, hasPhoto: true, recorded: true },
+  { id: '3', time: '14:10', endTime: '14:45', place: '코엑스몰', address: '', memo: '', expense: 0, hasPhoto: false, recorded: false },
+  { id: '4', time: '15:20', endTime: '17:00', place: '코엑스 도서관', address: '서울시 강남구 영동대로 513', memo: '독서 시간. 조용하고 집중하기 좋은 환경.', expense: 0, hasPhoto: false, recorded: true },
 ]
-
 function formatDate(date: Date) {
   return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })
 }
@@ -28,6 +29,9 @@ function formatDuration(start: string, end: string) {
 export default function Timeline() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [showCalendar, setShowCalendar] = useState(false)
+const [showImport, setShowImport] = useState(false)
+// const [importedPlaces, setImportedPlaces] = useState<PlaceItem[]>([])
+const [, setImportedPlaces] = useState<PlaceItem[]>([])
 
   const prevDay = () => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }
   const nextDay = () => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }
@@ -52,12 +56,14 @@ export default function Timeline() {
       </div>
 
       {/* 임포트 버튼 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EEEDFE', border: '0.5px solid #AFA9EC', borderRadius: 8, padding: '7px 14px', margin: '10px 16px 2px', cursor: 'pointer' }}>
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#534AB7" strokeWidth={2} strokeLinecap="round">
-          <path d="M7 1v7M4 5.5l3 3 3-3" /><path d="M1 9.5v1a2 2 0 002 2h8a2 2 0 002-2v-1" />
-        </svg>
-        <span style={{ fontSize: 12, color: '#534AB7', fontWeight: 500 }}>구글 타임라인 가져오기</span>
-      </div>
+      <div
+  onClick={() => setShowImport(true)}
+  style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EEEDFE', border: '0.5px solid #AFA9EC', borderRadius: 8, padding: '7px 14px', margin: '10px 16px 2px', cursor: 'pointer' }}>
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="#534AB7" strokeWidth={2} strokeLinecap="round">
+    <path d="M7 1v7M4 5.5l3 3 3-3" /><path d="M1 9.5v1a2 2 0 002 2h8a2 2 0 002-2v-1" />
+  </svg>
+  <span style={{ fontSize: 12, color: '#534AB7', fontWeight: 500 }}>구글 타임라인 가져오기</span>
+</div>
 
       {/* 타임라인 목록 */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 90px' }}>
@@ -117,6 +123,14 @@ export default function Timeline() {
       </div>
 
       {/* 캘린더 팝업 */}
+    {showImport && (
+        <ImportSheet
+          targetDate={currentDate}
+          onImport={(places) => setImportedPlaces(places)}
+          onClose={() => setShowImport(false)}
+        />
+      )}
+
       {showCalendar && (
         <CalendarSheet
           currentDate={currentDate}
