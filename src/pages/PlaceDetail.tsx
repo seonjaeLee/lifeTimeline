@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import ExpenseSheet from '../components/common/ExpenseSheet'
 
 const DUMMY_PLACES = [
   { id: '1', time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500 },
@@ -21,6 +22,8 @@ function formatDuration(start: string, end: string) {
   return `${m}분`
 }
 
+type Expense = { id: string; amount: number; category: string; memo: string; type: 'expense' | 'income' }
+
 export default function PlaceDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -30,10 +33,12 @@ export default function PlaceDetail() {
   const [memo, setMemo] = useState(place?.memo ?? '')
   const [memoLen, setMemoLen] = useState(place?.memo?.length ?? 0)
   const [isEditingMemo, setIsEditingMemo] = useState(false)
-
-  if (!place) return (
-    <div style={{ padding: 20, color: '#888' }}>장소를 찾을 수 없습니다.</div>
+  const [showExpense, setShowExpense] = useState(false)
+  const [expenses, setExpenses] = useState<Expense[]>(
+    place?.expense ? [{ id: '1', amount: place.expense, category: '기타', memo: '', type: 'expense' }] : []
   )
+
+  if (!place) return <div style={{ padding: 20, color: '#888' }}>장소를 찾을 수 없습니다.</div>
 
   const duration = formatDuration(place.time, place.endTime)
 
@@ -49,12 +54,7 @@ export default function PlaceDetail() {
       {/* 헤더 */}
       <div style={{ background: '#F8F7F2', padding: '8px 20px 14px', borderBottom: '0.5px solid #EDECE8', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <button
-            onClick={() => navigate(-1)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#B4B2A9', lineHeight: 1, padding: 0 }}
-          >
-            ←
-          </button>
+          <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#B4B2A9', lineHeight: 1, padding: 0 }}>←</button>
           <span style={{ fontSize: 18, fontWeight: 600, color: '#1A1A1A', letterSpacing: -0.4 }}>{place.place}</span>
         </div>
         <div style={{ fontSize: 12, color: '#888780' }}>
@@ -91,18 +91,13 @@ export default function PlaceDetail() {
           <span style={secLabel}>기분</span>
           <div style={{ display: 'flex', gap: 10 }}>
             {MOODS.map((mood, i) => (
-              <div
-                key={i}
-                onClick={() => setSelectedMood(i === selectedMood ? null : i)}
-                style={{
-                  width: 38, height: 38, borderRadius: '50%',
-                  border: `1.5px solid ${i === selectedMood ? '#5A50C8' : '#EDECE8'}`,
-                  background: i === selectedMood ? '#EEEDFE' : '#FFF',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20, cursor: 'pointer',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
-              >
+              <div key={i} onClick={() => setSelectedMood(i === selectedMood ? null : i)} style={{
+                width: 38, height: 38, borderRadius: '50%',
+                border: `1.5px solid ${i === selectedMood ? '#5A50C8' : '#EDECE8'}`,
+                background: i === selectedMood ? '#EEEDFE' : '#FFF',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s',
+              }}>
                 {mood}
               </div>
             ))}
@@ -116,49 +111,24 @@ export default function PlaceDetail() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ ...secLabel, marginBottom: 0 }}>메모</span>
             {!isEditingMemo && (
-              <button
-                onClick={() => setIsEditingMemo(true)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#5A50C8', fontWeight: 500 }}
-              >
-                편집
-              </button>
+              <button onClick={() => setIsEditingMemo(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#5A50C8', fontWeight: 500 }}>편집</button>
             )}
           </div>
-
           {isEditingMemo ? (
             <div style={{ position: 'relative', background: '#FFF', border: '1.5px solid #5A50C8', borderRadius: 12, padding: '12px 12px 28px' }}>
               <textarea
-                autoFocus
-                maxLength={500}
-                value={memo}
+                autoFocus maxLength={500} value={memo}
                 onChange={(e) => { setMemo(e.target.value); setMemoLen(e.target.value.length) }}
-                style={{
-                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
-                  fontSize: 14, color: '#444441', fontFamily: 'Pretendard, sans-serif',
-                  resize: 'none', minHeight: 100, lineHeight: 1.75,
-                }}
+                style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', fontSize: 14, color: '#444441', fontFamily: 'Pretendard, sans-serif', resize: 'none', minHeight: 100, lineHeight: 1.75 }}
               />
               <span style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 11, color: '#C8C6C0' }}>{memoLen}/500</span>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
-                <button
-                  onClick={() => { setMemo(place.memo); setIsEditingMemo(false) }}
-                  style={{ background: 'none', border: '0.5px solid #EDECE8', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#888780', cursor: 'pointer' }}
-                >
-                  취소
-                </button>
-                <button
-                  onClick={() => setIsEditingMemo(false)}
-                  style={{ background: '#5A50C8', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#FFF', fontWeight: 600, cursor: 'pointer' }}
-                >
-                  저장
-                </button>
+                <button onClick={() => { setMemo(place.memo); setIsEditingMemo(false) }} style={{ background: 'none', border: '0.5px solid #EDECE8', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#888780', cursor: 'pointer' }}>취소</button>
+                <button onClick={() => setIsEditingMemo(false)} style={{ background: '#5A50C8', border: 'none', borderRadius: 8, padding: '6px 14px', fontSize: 12, color: '#FFF', fontWeight: 600, cursor: 'pointer' }}>저장</button>
               </div>
             </div>
           ) : (
-            <div
-              onClick={() => setIsEditingMemo(true)}
-              style={{ background: '#FFF', border: '0.5px solid #EDECE8', borderRadius: 12, padding: 12, minHeight: 100, fontSize: 14, color: memo ? '#444441' : '#D3D1C7', lineHeight: 1.75, cursor: 'text' }}
-            >
+            <div onClick={() => setIsEditingMemo(true)} style={{ background: '#FFF', border: '0.5px solid #EDECE8', borderRadius: 12, padding: 12, minHeight: 100, fontSize: 14, color: memo ? '#444441' : '#D3D1C7', lineHeight: 1.75, cursor: 'text' }}>
               {memo || '이 장소에서의 기록을 남겨보세요'}
             </div>
           )}
@@ -169,18 +139,21 @@ export default function PlaceDetail() {
         {/* 지출 */}
         <div>
           <span style={secLabel}>지출</span>
-          {place.expense > 0 ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '0.5px solid #F1EFE8' }}>
-              <div>
-                <div style={{ fontSize: 14, color: '#1A1A1A', fontWeight: 500 }}>지출 내역</div>
-                <div style={{ fontSize: 11, color: '#B4B2A9' }}>기타</div>
-              </div>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#D85A30' }}>− {place.expense.toLocaleString()}원</span>
-            </div>
-          ) : (
+          {expenses.length === 0 && (
             <div style={{ fontSize: 13, color: '#D3D1C7', padding: '8px 0' }}>지출 내역이 없습니다</div>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', cursor: 'pointer' }}>
+          {expenses.map((e) => (
+            <div key={e.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '0.5px solid #F1EFE8' }}>
+              <div>
+                <div style={{ fontSize: 14, color: '#1A1A1A', fontWeight: 500 }}>{e.memo || e.category}</div>
+                <div style={{ fontSize: 11, color: '#B4B2A9' }}>{e.category}</div>
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 500, color: e.type === 'expense' ? '#D85A30' : '#1D9E75' }}>
+                {e.type === 'expense' ? '−' : '+'} {e.amount.toLocaleString()}원
+              </span>
+            </div>
+          ))}
+          <div onClick={() => setShowExpense(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 0', cursor: 'pointer' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A50C8" strokeWidth={2} strokeLinecap="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -189,6 +162,15 @@ export default function PlaceDetail() {
         </div>
 
       </div>
+
+      {/* 지출 팝업 */}
+      {showExpense && (
+        <ExpenseSheet
+          onSave={(e) => setExpenses((prev) => [...prev, { id: Date.now().toString(), ...e }])}
+          onClose={() => setShowExpense(false)}
+        />
+      )}
+
     </div>
   )
 }
