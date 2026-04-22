@@ -3,6 +3,7 @@ import CalendarSheet from '../components/common/CalendarSheet'
 import ImportSheet from '../components/common/ImportSheet'
 import AddPlaceSheet from '../components/common/AddPlaceSheet'
 import type { PlaceItem } from '../utils/parseTimeline'
+import { useNavigate } from 'react-router-dom'
 
 const DUMMY_PLACES = [
   { id: '1', time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500, hasPhoto: true, recorded: true },
@@ -36,6 +37,7 @@ export default function Timeline() {
   const [showImport, setShowImport] = useState(false)
   const [showAddPlace, setShowAddPlace] = useState(false)
   const [places, setPlaces] = useState<Place[]>(DUMMY_PLACES)
+  const navigate = useNavigate()
 
   const prevDay = () => {
     const d = new Date(currentDate)
@@ -139,7 +141,9 @@ export default function Timeline() {
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#5A50C8', flexShrink: 0, marginTop: 4 }} />
                 {!isLast && <div style={{ width: 1.5, flex: 1, minHeight: 16, background: '#CECBF6' }} />}
               </div>
-              <div style={{ flex: 1, paddingBottom: 24, minWidth: 0, cursor: 'pointer' }}>
+              <div 
+                onClick={() => navigate(`/place/${item.id}`)}
+                style={{ flex: 1, paddingBottom: 24, minWidth: 0, cursor: 'pointer' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                   <span style={{ fontSize: 15, fontWeight: 600, color: '#1A1A1A', letterSpacing: -0.3 }}>{item.time}</span>
                   <span style={{ fontSize: 13, color: '#D3D1C7' }}>·</span>
@@ -183,7 +187,7 @@ export default function Timeline() {
             <span style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 500 }}>장소 직접 추가</span>
             </div>
         </div>
-        
+
       </div>
 
       {/* 팝업 */}
