@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CalendarSheet from '../components/common/CalendarSheet'
 import ImportSheet from '../components/common/ImportSheet'
 import type { PlaceItem } from '../utils/parseTimeline'
+import AddPlaceSheet from '../components/common/AddPlaceSheet'
 
 const DUMMY_PLACES = [
   { id: '1', time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500, hasPhoto: true, recorded: true },
@@ -32,6 +33,8 @@ export default function Timeline() {
 const [showImport, setShowImport] = useState(false)
 // const [importedPlaces, setImportedPlaces] = useState<PlaceItem[]>([])
 const [, setImportedPlaces] = useState<PlaceItem[]>([])
+const [showAddPlace, setShowAddPlace] = useState(false)
+
 
   const prevDay = () => { const d = new Date(currentDate); d.setDate(d.getDate() - 1); setCurrentDate(d) }
   const nextDay = () => { const d = new Date(currentDate); d.setDate(d.getDate() + 1); setCurrentDate(d) }
@@ -63,6 +66,16 @@ const [, setImportedPlaces] = useState<PlaceItem[]>([])
     <path d="M7 1v7M4 5.5l3 3 3-3" /><path d="M1 9.5v1a2 2 0 002 2h8a2 2 0 002-2v-1" />
   </svg>
   <span style={{ fontSize: 12, color: '#534AB7', fontWeight: 500 }}>구글 타임라인 가져오기</span>
+</div>
+
+{/* 수동 장소 추가 버튼 */}
+<div
+  onClick={() => setShowAddPlace(true)}
+  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px 2px', cursor: 'pointer' }}>
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B4B2A9" strokeWidth={2} strokeLinecap="round">
+    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+  <span style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 500 }}>장소 직접 추가</span>
 </div>
 
       {/* 타임라인 목록 */}
@@ -138,6 +151,13 @@ const [, setImportedPlaces] = useState<PlaceItem[]>([])
           onClose={() => setShowCalendar(false)}
         />
       )}
+
+      {showAddPlace && (
+  <AddPlaceSheet
+    onAdd={(place) => console.log('추가된 장소:', place)}
+    onClose={() => setShowAddPlace(false)}
+  />
+)}
     </div>
   )
 }
