@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import BottomSheet from './BottomSheet'
+import { classifyCategory } from '../../utils/claude'
 
 interface Props {
   onSave: (expense: { amount: number; category: string; memo: string; type: 'expense' | 'income' }) => void
@@ -17,12 +18,14 @@ const CATEGORIES = [
   { icon: '📦', label: '기타' },
 ]
 
+
 export default function ExpenseSheet({ onSave, onClose }: Props) {
   const [type, setType] = useState<'expense' | 'income'>('expense')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('식비')
   const [memo, setMemo] = useState('')
   const [memoLen, setMemoLen] = useState(0)
+  const [isClassifying, setIsClassifying] = useState(false)
 
   return (
     <BottomSheet onClose={onClose}>
@@ -118,6 +121,28 @@ export default function ExpenseSheet({ onSave, onClose }: Props) {
               <span style={{ position: 'absolute', bottom: 8, right: 12, fontSize: 11, color: '#C8C6C0' }}>{memoLen}/100</span>
             </div>
           </div>
+
+        {/* AI 카테고리 자동 분류 버튼 */}
+{amount && Number(amount) > 0 && (
+  <div style={{ padding: '8px 20px 0' }}>
+    <button
+      onClick={async () => {
+        setIsClassifying(true)
+        const result = await classifyCategory('장소', Number(amount))
+        setCategory(result)
+        setIsClassifying(false)
+      }}
+      style={{
+        width: '100%', padding: 10, borderRadius: 10,
+        background: '#EEEDFE', border: '0.5px solid #AFA9EC',
+        color: '#534AB7', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+        fontFamily: 'Pretendard, sans-serif',
+      }}
+    >
+      {isClassifying ? 'AI 분류 중...' : '✦ AI로 카테고리 자동 분류'}
+    </button>
+  </div>
+)}
 
           {/* 저장 버튼 */}
           <div style={{ padding: '12px 20px 0' }}>

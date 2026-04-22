@@ -4,6 +4,7 @@ import ImportSheet from '../components/common/ImportSheet'
 import AddPlaceSheet from '../components/common/AddPlaceSheet'
 import type { PlaceItem } from '../utils/parseTimeline'
 import { useNavigate } from 'react-router-dom'
+import { summarizeDay } from '../utils/claude'
 
 const DUMMY_PLACES = [
   { id: '1', time: '09:30', endTime: '11:00', place: '스타벅스 강남점', address: '서울시 강남구 테헤란로 123', memo: '아침 미팅. 새로운 프로젝트 기획안 논의했음. 분위기 좋았고 아이디어도 많이 나왔다.', expense: 8500, hasPhoto: true, recorded: true },
@@ -38,6 +39,8 @@ export default function Timeline() {
   const [showAddPlace, setShowAddPlace] = useState(false)
   const [places, setPlaces] = useState<Place[]>(DUMMY_PLACES)
   const navigate = useNavigate()
+const [daySummary, setDaySummary] = useState('')
+const [isSummarizing, setIsSummarizing] = useState(false)
 
   const prevDay = () => {
     const d = new Date(currentDate)
@@ -102,6 +105,35 @@ export default function Timeline() {
           </button>
         </div>
       </div>
+
+      {/* 하루 한 줄 요약 */}
+{daySummary ? (
+  <div style={{ margin: '8px 16px 2px', padding: '8px 12px', background: '#EEEDFE', borderRadius: 8, fontSize: 12, color: '#534AB7', lineHeight: 1.6 }}>
+    ✦ {daySummary}
+  </div>
+) : (
+  <button
+    onClick={async () => {
+      setIsSummarizing(true)
+      const summary = await summarizeDay(
+        places.filter((p) => p.recorded).map((p) => ({
+          place: p.place,
+          memo: p.memo,
+          expense: p.expense,
+        }))
+      )
+      setDaySummary(summary)
+      setIsSummarizing(false)
+    }}
+    style={{
+      display: 'flex', alignItems: 'center', gap: 6,
+      background: 'none', border: 'none', cursor: 'pointer',
+      padding: '6px 16px 2px', fontSize: 12, color: '#B4B2A9',
+    }}
+  >
+    {isSummarizing ? '✦ AI 요약 생성 중...' : '✦ 하루 요약 생성'}
+  </button>
+)}
 
       {/* 임포트 버튼 */}
       <div onClick={() => setShowImport(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#EEEDFE', border: '0.5px solid #AFA9EC', borderRadius: 8, padding: '7px 14px', margin: '10px 16px 2px', cursor: 'pointer' }}>

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import BottomSheet from './BottomSheet'
 import { parseTimelineJSON } from '../../utils/parseTimeline'
 import type { PlaceItem } from '../../utils/parseTimeline'
+import { cleanPlaceName } from '../../utils/claude'
 
 interface Props {
   targetDate: Date
@@ -18,21 +19,31 @@ export default function ImportSheet({ targetDate, onImport, onClose }: Props) {
   const [parsed, setParsed] = useState(false)
   const [error, setError] = useState('')
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     setError('')
 
     const reader = new FileReader()
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
         const json = JSON.parse(ev.target?.result as string)
         const items = parseTimelineJSON(json, targetDate).filter(
           (p) => p.durationMin >= MIN_DURATION
         )
-        setPlaces(items)
-        setSelected(new Set(items.map((p) => p.id)))
+        // setPlaces(items)
+        // setSelected(new Set(items.map((p) => p.id)))
         setParsed(true)
+        // AI 장소명 정리
+const cleaned = await Promise.all(
+  items.map(async (p) => ({
+    ...p,
+    place: await cleanPlaceName(p.place),
+  }))
+)
+setPlaces(cleaned)
+setSelected(new Set(cleaned.map((p) => p.id)))
+
         if (items.length === 0) setError('해당 날짜에 30분 이상 머문 장소가 없습니다.')
       } catch {
         setError('파일을 읽을 수 없습니다. Timeline.json 파일인지 확인해주세요.')
