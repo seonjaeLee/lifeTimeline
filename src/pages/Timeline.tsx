@@ -109,14 +109,6 @@ export default function Timeline() {
         <span style={{ fontSize: 12, color: '#534AB7', fontWeight: 500 }}>구글 타임라인 가져오기</span>
       </div>
 
-      {/* 수동 장소 추가 버튼 */}
-      <div onClick={() => setShowAddPlace(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px 2px', cursor: 'pointer' }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B4B2A9" strokeWidth={2} strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-        <span style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 500 }}>장소 직접 추가</span>
-      </div>
-
       {/* 타임라인 목록 */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 90px' }}>
         {places.map((item, index) => {
@@ -174,6 +166,24 @@ export default function Timeline() {
             </div>
           )
         })}
+      
+        {/* 장소 직접 추가 버튼 */}
+        <div
+            onClick={() => setShowAddPlace(true)}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '16px 0 8px', cursor: 'pointer' }}
+        >
+            <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: '#FFFFFF', border: '0.5px solid #EDECE8',
+            borderRadius: 20, padding: '8px 16px',
+            }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B4B2A9" strokeWidth={2} strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span style={{ fontSize: 12, color: '#B4B2A9', fontWeight: 500 }}>장소 직접 추가</span>
+            </div>
+        </div>
+        
       </div>
 
       {/* 팝업 */}
